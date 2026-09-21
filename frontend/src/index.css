@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cinzel Decorative", serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Outfit", sans-serif;
+  --color-void: #05030a;
+  --color-wine: #3b1224;
+  --color-gold: #d4af37;
+  --color-gold-bright: #f3e5ab;
+  --color-ivory: #f6f0e4;
+  --color-aegean: #14343f;
+  --color-bronze: #8c5a2b;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #05030a;
+  color: #f6f0e4;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+}
+
+.palace-bg {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(212, 175, 55, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 10% 110%, rgba(59, 18, 36, 0.55), transparent 50%),
+    radial-gradient(800px 400px at 110% 80%, rgba(20, 52, 63, 0.5), transparent 45%),
+    #05030a;
+}
+
+.gold-text {
+  background: linear-gradient(180deg, #fff6d4 0%, #d4af37 42%, #8c5a2b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marble {
+  background:
+    linear-gradient(135deg, rgba(246, 240, 228, 0.08), rgba(20, 52, 63, 0.18)),
+    linear-gradient(rgba(212, 175, 55, 0.08), transparent);
+  border: 1px solid rgba(243, 229, 171, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 212, 0.18),
+    0 24px 60px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+}
+
+.filigree {
+  position: relative;
+}
+
+.filigree::before,
+.filigree::after {
+  content: "";
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: rgba(212, 175, 55, 0.55);
+  border-style: solid;
+}
+
+.filigree::before {
+  top: 10px;
+  left: 10px;
+  border-width: 1px 0 0 1px;
+}
+
+.filigree::after {
+  right: 10px;
+  bottom: 10px;
+  border-width: 0 1px 1px 0;
+}
+
+.ring {
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  animation: spin 48s linear infinite;
+}
+
+.ring-delay {
+  animation-duration: 72s;
+  animation-direction: reverse;
+}
+
+.river {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, #f3e5ab, #d4af37, transparent);
+  background-size: 200% 100%;
+  animation: river 8s linear infinite;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.55);
+}
+
+.shimmer {
+  background: linear-gradient(110deg, transparent 20%, rgba(243, 229, 171, 0.18) 45%, transparent 70%);
+  background-size: 220% 100%;
+  animation: shimmer 4.5s ease-in-out infinite;
+}
+
+.parchment {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(243, 229, 171, 0.12), transparent 40%),
+    linear-gradient(180deg, rgba(246, 240, 228, 0.1), rgba(5, 3, 10, 0.15));
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes river {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: rise 0.7s ease both;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#d4af37, #8c5a2b);
+  border-radius: 99px;
+}
+
+::selection {
+  background: rgba(212, 175, 55, 0.35);
+}
