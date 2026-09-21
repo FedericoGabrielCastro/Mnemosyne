@@ -1,57 +1,54 @@
-<div align="center">
-  <img src="docs/banner.svg" alt="Mnemosyne — the river that remembers" width="100%">
-</div>
+![Mnemosyne — local RAG and semantic search](./docs/cover.png)
 
-<br>
+# Mnemosyne
 
-<div align="center">
+**Local RAG and semantic search.** Upload documents, retrieve by meaning, and get cited answers — embeddings, index, API, and UI all run on your machine. No OpenAI key. No data leaving the laptop.
 
-[![Python](https://img.shields.io/badge/Python-3.11–3.13-d4af37?style=for-the-badge&labelColor=05030a)](rag/pyproject.toml)
-[![Django](https://img.shields.io/badge/Django-REST-8c5a2b?style=for-the-badge&labelColor=05030a)](backend/README.md)
-[![React](https://img.shields.io/badge/React-Vite-f3e5ab?style=for-the-badge&labelColor=05030a&color=3b1224)](frontend/README.md)
-[![Local](https://img.shields.io/badge/Local--first-ONNX_+_Chroma-14343f?style=for-the-badge&labelColor=05030a)](#the-rite)
+[![Python](https://img.shields.io/badge/python-3.11%E2%80%933.13-3776AB?logo=python&logoColor=white)](rag/pyproject.toml)
+[![Django](https://img.shields.io/badge/Django-REST_API-092E20?logo=django&logoColor=white)](backend/README.md)
+[![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](frontend/README.md)
+[![pnpm](https://img.shields.io/badge/pnpm-frontend-F69220?logo=pnpm&logoColor=white)](frontend/package.json)
+[![Poetry](https://img.shields.io/badge/Poetry-backend-60A5FA?logo=poetry&logoColor=white)](backend/pyproject.toml)
 
-**A memory palace on your machine.**  
-Inscribe documents. Embed them locally. Ask by intent.  
-The vault does not invent. It recalls.
+## Why this exists
 
-[Enter the vaults](#run) · [The rite](#the-rite) · [API](#oracle-api)
+Most RAG demos are a notebook plus a hosted model. Mnemosyne is a full product loop you can clone and run:
 
-</div>
+1. **Ingest** — markdown, text, or PDF → overlapping chunks  
+2. **Index** — local ONNX embeddings (`BAAI/bge-small-en-v1.5`) stored in ChromaDB  
+3. **Retrieve** — semantic search by intent, not keywords  
+4. **Answer** — extractive citations by default; optional [Ollama](https://ollama.com/) if you want generation
 
----
+Privacy is the default: the index lives on disk. A remote model is used only if you start Ollama yourself.
 
-## The rite
+## What you can do
 
-Three motions. One palace. Nothing is sent away unless you wake [Ollama](https://ollama.com/) yourself.
+- Create **vaults** (document collections)
+- Upload files and watch them get chunked and indexed
+- **Semantic search** with scores and source passages
+- **Ask** a question and receive an answer grounded in those passages
+- Drop Ollama in later without changing the retrieval pipeline
 
-| | Inscribe | Remember | Ask |
-| --- | --- | --- | --- |
-| **What** | Markdown, text, or PDF is laid on a vault and split into overlapping shards | Each shard becomes a vector with `BAAI/bge-small-en-v1.5` (ONNX, on disk) | A question is embedded the same way; nearest shards surface |
-| **Where** | `rag/` · `backend/` | ChromaDB under `data/palace` | `POST /api/vaults/:id/search/` and `/ask/` |
+## Architecture
 
 ```mermaid
 flowchart LR
-  A["Oracle UI<br/>React · Vite · Tailwind"] --> B["Django REST<br/>vaults · offerings · oracle"]
-  B --> C["MemoryPalace<br/>Poetry RAG"]
-  C --> D["FastEmbed ONNX"]
-  C --> E["ChromaDB"]
-  C -.-> F["Ollama<br/>optional"]
+  UI[React + Vite + Tailwind] --> API[Django REST]
+  API --> RAG[MemoryPalace]
+  RAG --> EMB[FastEmbed ONNX]
+  RAG --> VEC[ChromaDB]
+  RAG -.-> LLM[Ollama optional]
 ```
 
-<div align="center">
-
-| Chamber | Stack | Role |
+| Package | Stack | Responsibility |
 | --- | --- | --- |
-| [`rag/`](rag/README.md) | Poetry · ChromaDB · FastEmbed | Local embeddings, ingest, semantic retrieval |
-| [`backend/`](backend/README.md) | Django · DRF · CORS | HTTP vaults over the palace |
-| [`frontend/`](frontend/README.md) | React · Vite · pnpm · Tailwind | Gold-leaf oracle UI |
+| [`rag/`](rag/README.md) | Poetry, FastEmbed, ChromaDB, pypdf | Embeddings, ingest, retrieval, optional generation |
+| [`backend/`](backend/README.md) | Django, DRF, CORS | Vaults, uploads, search/ask HTTP API |
+| [`frontend/`](frontend/README.md) | React, Vite, pnpm, Tailwind | Vault UI, upload, oracle, citations |
 
-</div>
+## Quick start
 
-## Run
-
-Requirements: **Python 3.11–3.13**, [Poetry](https://python-poetry.org/), **Node 20+**, [pnpm](https://pnpm.io/).
+**Python 3.11–3.13**, [Poetry](https://python-poetry.org/), **Node 20+**, [pnpm](https://pnpm.io/).
 
 ```bash
 cd rag && poetry install
@@ -68,24 +65,21 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Vite proxies `/api` to Django.
+App: [http://127.0.0.1:5173](http://127.0.0.1:5173) · API: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
 
-> The first non-lexical ingest downloads `BAAI/bge-small-en-v1.5` and keeps it on disk.  
-> Set `MNEMOSYNE_LEXICAL=true` in `backend/.env` if you want a first run without that download.
+The first real ingest downloads the ONNX embedding model and caches it. For a first run without that download, set `MNEMOSYNE_LEXICAL=true` in `backend/.env`.
 
-Without Ollama, the oracle answers **extractively** from cited shards. With Ollama on `127.0.0.1:11434`, it may compose a **generative** reply still grounded in those shards.
+## API
 
-## Oracle API
-
-| Method | Path | Rite |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health/` | Pulse of the palace |
-| `GET` `POST` | `/api/vaults/` | List / inscribe vaults |
-| `GET` `PATCH` `DELETE` | `/api/vaults/:id/` | Chamber detail |
-| `GET` `POST` | `/api/vaults/:id/documents/` | List / offer manuscripts |
-| `DELETE` | `/api/vaults/:id/documents/:doc_id/` | Forget a document |
+| `GET` | `/api/health/` | Health check |
+| `GET` `POST` | `/api/vaults/` | List / create vaults |
+| `GET` `PATCH` `DELETE` | `/api/vaults/:id/` | Vault detail |
+| `GET` `POST` | `/api/vaults/:id/documents/` | List / upload documents |
+| `DELETE` | `/api/vaults/:id/documents/:doc_id/` | Delete a document from the index |
 | `POST` | `/api/vaults/:id/search/` | Semantic search |
-| `POST` | `/api/vaults/:id/ask/` | RAG answer with citations |
+| `POST` | `/api/vaults/:id/ask/` | RAG answer + citations |
 
 ```bash
 curl -s http://127.0.0.1:8000/api/health/
@@ -99,10 +93,3 @@ cd rag && poetry run pytest
 cd backend && MNEMOSYNE_LEXICAL=true poetry run python manage.py test
 cd frontend && pnpm build
 ```
-
-## Why Mnemosyne
-
-Poets drank from her spring so the song would not dissolve into Lethe.  
-This palace is that spring, compiled: **local RAG**, **semantic search**, and an oracle that only speaks from what you inscribed.
-
-<p align="center"><i>Drink before you speak.</i></p>
